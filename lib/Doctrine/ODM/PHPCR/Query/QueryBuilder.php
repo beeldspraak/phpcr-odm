@@ -128,7 +128,7 @@ class QueryBuilder
      * @todo: This should finally return an instance of PHPCR\ODM query
      *        with an embedded DocumentManager and not the PHPCR query
      *
-     * @return PHPCR\Query\QueryInterface
+     * @return \PHPCR\Query\QueryInterface
      */
     public function getQuery()
     {
@@ -154,10 +154,18 @@ class QueryBuilder
         }
 
         if ($from) {
-            $this->andWhere($this->expr()->orX(
+
+            $metadata = $this->dm->getClassMetadata($from);
+            $classExpressions = array(
                 $this->expr()->eq('phpcr:class', $from),
-                $this->expr()->eq('phpcr:classparents', $from)
-            ));
+                $this->expr()->eq('phpcr:classparents', $from),
+            );
+            if ('child' === $metadata->translator) {
+                // If child translation strategy, also search the child for the values
+                $classExpressions[] = $this->expr()->eq('jcr:namespace', 'phpcr_locale:');
+
+            }
+            $this->andWhere(call_user_func_array(array($this->expr(), 'orX'), $classExpressions));
         }
 
         $where = $this->getPart('where');
