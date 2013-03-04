@@ -526,8 +526,8 @@ class UnitOfWork
         $oid = spl_object_hash($document);
         if (isset($this->documentLocales[$oid]['current'])) {
             $hints['locale'] = $this->documentLocales[$oid]['current'];
-            $hints['fallback'] = true;
         }
+        $hints['fallback'] = true;
 
         $this->getOrCreateDocument($className, $node, $hints);
     }
